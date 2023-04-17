@@ -1,67 +1,61 @@
+import UserService from './user.service.js';
 class UserController {
-    constructor() {
-        this.users = [
-            {
-                "id": 1,
-                "fullname": "Nguyen Huy Tuong",
-                "gender": true,
-                "age": 18
-            },
-            {
-                "id": 2,
-                "fullname": "Nguyen Thi Tuong",
-                "gender": false,
-                "age": 15
-            }
-        ];
+    getAllUser = async (req, res, next) => {
+        const users = await UserService.getAll();
+        return res.status(200).json(users);
     }
 
-    getAllUser = (req, res, next) => {
-        return res.status(200).json(this.users);
-    }
-
-    getUserById = (req, res, next) => {
-        const user = this.users.find(x => x.id == req.params.id);
+    getUserById = async (req, res, next) => {
+        const user = await UserService.getById(req.params.id);
         if (user == null) {
             return res.status(404).json({ message: 'User does not exist.' });
         }
         return res.status(200).json(user);
     }
 
-    createNewUser = (req, res, next) => {
-        const newUser = {
-            id: Number(this.users.at(-1)?.id || 0) + 1,
+    createNewUser = async (req, res, next) => {
+        let newUser = {
             fullname: req.body.fullname,
             gender: req.body.gender,
             age: req.body.age
         };
-        this.users.push(newUser);
+        await UserService.create(newUser);
         return res.status(201).json(newUser);
     }
 
-    updateUser = (req, res, next) => {
-        const index = this.users.map(x => x.id).indexOf(Number(req.params.id));
-        if (index == -1) {
+    updateUser = async (req, res, next) => {
+        let user = await UserService.getById(req.params.id);
+        if (user == null) {
             return res.status(404).json({ message: 'User does not exist.' });
         }
 
-        this.users[index] = {
-            id: this.users[index].id,
+        user = {
+            ...user,
             fullname: req.body.fullname,
             gender: req.body.gender,
             age: req.body.age
         };
+
+        try {
+            await UserService.update(req.params.id, user);
+        } catch (error) {
+            return res.status(500).json({ message: error.message });
+        }
 
         return res.status(204).json();
     }
 
-    removeUser = (req, res, next) => {
-        const index = this.users.map(x => x.id).indexOf(Number(req.params.id));
-        if (index == -1) {
+    removeUser = async (req, res, next) => {
+        const user = await UserService.getById(req.params.id);
+        if (user == null) {
             return res.status(404).json({ message: 'User does not exist.' });
         }
 
-        this.users.splice(index, 1);
+        try {
+            await UserService.removeById(req.params.id);
+        } catch (error) {
+            return res.status(500).json({ message: error.message });
+        }
         return res.status(204).json();
     }
 }

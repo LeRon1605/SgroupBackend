@@ -1,4 +1,4 @@
-import 'dotenv';
+import 'dotenv/config';
 import express from 'express';
 import routers from './api/index.js';
 
