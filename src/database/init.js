@@ -9,6 +9,7 @@ const queryString = `
         GENDER TINYINT,
         FULLNAME VARCHAR(255),
         AGE INT,
+        PASSWORD VARCHAR(30),
         CHECK (AGE > 0)   
     );
 `;
