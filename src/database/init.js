@@ -7,9 +7,12 @@ const queryString = `
     (
         ID INT PRIMARY KEY AUTO_INCREMENT,
         GENDER TINYINT,
-        FULLNAME VARCHAR(255),
+        NAME VARCHAR(255),
+        USERNAME VARCHAR(30),
         AGE INT,
-        PASSWORD VARCHAR(30),
+        PASSWORD VARCHAR(255),
+        EMAIL NVARCHAR(255),
+        SALT VARCHAR(255),
         CHECK (AGE > 0)   
     );
 `;

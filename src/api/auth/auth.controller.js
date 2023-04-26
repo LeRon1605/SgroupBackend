@@ -12,6 +12,21 @@ class AuthController {
             access_token: token
         });
     }
+
+    async register(req, res) {
+        const { username, password, email, gender, name, age } = req.body;
+
+        if (await AuthService.checkExist(username)) {
+            return res.status(409).json({
+                message: 'User already exist.'
+            });
+        }
+
+        await AuthService.register({ username, password, email, gender, name, age });
+        return res.status(200).json({
+            message: 'Register account successfully.'
+        })
+    }
 }
 
 export default new AuthController();
