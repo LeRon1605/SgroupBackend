@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import fs from 'fs';
 
 const rawPassword = 'leron1605';
 
@@ -14,7 +15,17 @@ function hashWithRandomSalt(input) {
 
 const key = crypto.generateKeyPairSync(
     'rsa',
-    { modulusLength: 2048 }  
+    { 
+        modulusLength: 2048,
+        publicKeyEncoding: {
+            type: 'spki',
+            format: 'pem'
+        },
+        privateKeyEncoding: {
+            type: 'pkcs8',
+            format: 'pem'
+        }
+    },
 );
 
 const publicKey = key.publicKey;
@@ -38,7 +49,17 @@ const decryptedData = crypto.privateDecrypt(
     Buffer.from(encryptedData, 'base64')
 ).toString();
 
-console.log(hash(rawPassword));
-console.log(hashWithRandomSalt(rawPassword));
-console.log(encryptedData);
-console.log(decryptedData);
+fs.writeFile('./private-key.pem', privateKey, (err) => {
+    if (err) console.log(err);
+    else console.log('Data has been written to file');
+});
+
+fs.writeFile('./public-key.pem', publicKey, (err) => {
+    if (err) console.log(err);
+    else console.log('Data has been written to file');
+});
+
+// console.log(hash(rawPassword));
+// console.log(hashWithRandomSalt(rawPassword));
+// console.log(encryptedData);
+// console.log(decryptedData);

@@ -7,6 +7,11 @@ import {
 import {
     HashHelper
 } from '../../shared/helpers/index.js';
+import fs from 'fs';
+import path from 'path';
+import {fileURLToPath} from 'url';
+
+const fileName = fileURLToPath(import.meta.url);
 class AuthService {
     async getCredential(username, password) {
         const user = await getOne({
@@ -19,7 +24,9 @@ class AuthService {
             return jwt.sign({
                 id: user.ID,
                 username: user.NAME
-            }, process.env.JWT_SECRET);
+            }, fs.readFileSync(path.join(fileName, '../../../shared/secret/private-key.pem')), {
+                algorithm: 'RS256'
+            });
         }
 
         return null;
