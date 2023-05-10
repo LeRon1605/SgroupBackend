@@ -4,6 +4,7 @@ import path from 'path';
 import {fileURLToPath} from 'url';
 
 const fileName = fileURLToPath(import.meta.url);
+const publicKey = fs.readFileSync(path.join(fileName, '../../shared/secret/public-key.pem'));
 
 export default (req, res, next) => {
     const token = req.headers.authorization?.split(' ')[1] || req.headers.authorization;
@@ -13,7 +14,7 @@ export default (req, res, next) => {
         });
     } else {
         try {
-            const claims = jwt.verify(token, fs.readFileSync(path.join(fileName, '../../shared/secret/public-key.pem')), process.env.JWT_SECRET);
+            const claims = jwt.verify(token, publicKey, { algorithm: 'RS256' });
             req.session = claims;
             next();
         } catch (err) {

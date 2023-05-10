@@ -13,7 +13,11 @@ import {fileURLToPath} from 'url';
 
 const fileName = fileURLToPath(import.meta.url);
 class AuthService {
-    async getCredential(username, password) {
+    constructor() {
+        this.privateKey = fs.readFileSync(path.join(fileName, '../../../shared/secret/private-key.pem'));
+    }
+
+    getCredential = async (username, password) => {
         const user = await getOne({
             connection: connection,
             queryString: 'SELECT * FROM USERS WHERE USERNAME = ?',
@@ -24,7 +28,7 @@ class AuthService {
             return jwt.sign({
                 id: user.ID,
                 username: user.NAME
-            }, fs.readFileSync(path.join(fileName, '../../../shared/secret/private-key.pem')), {
+            }, this.privateKey, {
                 algorithm: 'RS256'
             });
         }
@@ -48,6 +52,16 @@ class AuthService {
             queryString: 'INSERT INTO USERS(USERNAME, PASSWORD, SALT, EMAIL, GENDER, NAME, AGE) VALUES(?, ?, ?, ?, ?, ?, ?)',
             params: [user.username, hashedPassword, salt, user.email, user.gender, user.name, user.age]
         });
+    }
+
+    async getByEmail(email) {
+        const user = await getOne({
+            connection: connection,
+            queryString: 'SELECT * FROM USERS WHERE EMAIL = ?',
+            params: [email]
+        });
+
+        return user;
     }
 }
 
