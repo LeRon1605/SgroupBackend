@@ -17,7 +17,8 @@ class UserController {
         let newUser = {
             fullname: req.body.fullname,
             gender: req.body.gender,
-            age: req.body.age
+            age: req.body.age,
+            password: req.body.password
         };
         await UserService.create(newUser);
         return res.status(201).json(newUser);
@@ -33,7 +34,8 @@ class UserController {
             ...user,
             fullname: req.body.fullname,
             gender: req.body.gender,
-            age: req.body.age
+            age: req.body.age,
+            password: req.body.password
         };
 
         try {

@@ -12,14 +12,14 @@ class UserService {
     }
 
     async create(user) {
-        await connection.query('INSERT INTO USERS(GENDER, FULLNAME, AGE) VALUES(?, ?, ?);', [user.gender, user.fullname, user.age]);
+        await connection.query('INSERT INTO USERS(GENDER, FULLNAME, AGE, PASSWORD) VALUES(?, ?, ?, ?);', [user.gender, user.fullname, user.age, user.password]);
         const [record] = await connection.query('SELECT LAST_INSERT_ID() AS ID;');
         user.id = record[0].ID;
         return user;
     }
 
     async update(id, user) {
-        await connection.query('UPDATE USERS SET GENDER = ?, FULLNAME = ?, AGE = ? WHERE ID = ?', [user.gender, user.fullname, user.age, id]);
+        await connection.query('UPDATE USERS SET GENDER = ?, FULLNAME = ?, AGE = ?, PASSWORD = ? WHERE ID = ?', [user.gender, user.fullname, user.age, user.password, id]);
     }
 
     async removeById(id) {
