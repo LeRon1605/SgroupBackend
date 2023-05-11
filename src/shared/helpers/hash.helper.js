@@ -15,6 +15,10 @@ class HashHelper {
         const hashedRawPassword = crypto.pbkdf2Sync(rawPassword, salt, 1000, 64, 'sha512').toString('hex'); 
         return hashedPassword === hashedRawPassword;
     }
+
+    generateRandomToken() {
+        return crypto.randomBytes(16).toString('hex');
+    }
 }
 
 const hash = (input) => {
