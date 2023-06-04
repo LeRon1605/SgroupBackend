@@ -13,6 +13,8 @@ const queryString = `
         PASSWORD VARCHAR(255),
         EMAIL NVARCHAR(255),
         SALT VARCHAR(255),
+        FORGET_PASSWORD_TOKEN VARCHAR(255),
+        FORGET_PASSWORD_TOKEN_EXPIRATION DATETIME,
         CHECK (AGE > 0)   
     );
 `;
