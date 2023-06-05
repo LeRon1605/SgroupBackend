@@ -18,7 +18,7 @@ class UserService {
 
     async create(user) {
         const id = await connection('users').insert(
-            { NAME: user.fullname, AGE: user.age, GENDER: user.gender, PASSWORD: user.password }
+            { NAME: user.fullname, AGE: user.age, GENDER: user.gender, PASSWORD: user.password, CREATEDBY: user.createdBy }
         ).returning(['ID'])
         user.id = id[0];
         return user;
