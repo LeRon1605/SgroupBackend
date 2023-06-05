@@ -21,11 +21,8 @@ class AuthService {
     }
 
     getCredential = async (username, password) => {
-        const user = await getOne({
-            connection: connection,
-            queryString: 'SELECT * FROM USERS WHERE USERNAME = ?',
-            params: [username]
-        });
+        const user = (await connection.select().where('USERNAME', username).from('users'))[0];
+        console.log(user);
 
         if (user && HashHelper.comparePassword({ hashedPassword: user.PASSWORD, salt: user.SALT, rawPassword: password })) {
             return jwt.sign({
@@ -40,11 +37,7 @@ class AuthService {
     }
 
     async checkExist(username) {
-        const user = await getOne({
-            connection: connection,
-            queryString: 'SELECT * FROM USERS WHERE USERNAME = ?',
-            params: [username]
-        });
+        const user = await connection.select().where('USERNAME', username);
         return user != null;
     }
 
