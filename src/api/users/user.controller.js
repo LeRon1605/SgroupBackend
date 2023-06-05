@@ -1,8 +1,14 @@
 import UserService from './user.service.js';
 class UserController {
     getAllUser = async (req, res, next) => {
-        const users = await UserService.getAll();
-        return res.status(200).json(users);
+        const { page, size, username } = req.query;
+        if (page && page > 0) {
+            const users = await UserService.getUserWithPaging(page, size, username);
+            return res.status(200).json(users);
+        } else {
+            const users = await UserService.getAll(username);
+            return res.status(200).json(users);
+        }
     }
 
     getUserById = async (req, res, next) => {
@@ -18,7 +24,8 @@ class UserController {
             fullname: req.body.fullname,
             gender: req.body.gender,
             age: req.body.age,
-            password: req.body.password
+            password: req.body.password,
+            createdBy: req.session.id
         };
         await UserService.create(newUser);
         return res.status(201).json(newUser);
