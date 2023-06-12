@@ -1,10 +1,5 @@
 import jwt from 'jsonwebtoken';
-import connection from '../../database/connection.js';
-import { 
-    getOne,
-    create,
-    update
-} from '../../database/query.js';
+import knex from '../../database/connection.js';
 import {
     HashHelper
 } from '../../shared/helpers/index.js';
@@ -21,11 +16,7 @@ class AuthService {
     }
 
     getCredential = async (username, password) => {
-        const user = await getOne({
-            connection: connection,
-            queryString: 'SELECT * FROM USERS WHERE USERNAME = ?',
-            params: [username]
-        });
+        const user = await knex.select().from('users').where('USERNAME', username);
 
         if (user && HashHelper.comparePassword({ hashedPassword: user.PASSWORD, salt: user.SALT, rawPassword: password })) {
             return jwt.sign({
@@ -40,39 +31,25 @@ class AuthService {
     }
 
     async checkExist(username) {
-        const user = await getOne({
-            connection: connection,
-            queryString: 'SELECT * FROM USERS WHERE USERNAME = ?',
-            params: [username]
-        });
+        const user = await knex.select().from('users').where('USERNAME', username);
         return user != null;
     }
 
     async register(user) {
         const { salt, hashedPassword } = HashHelper.hash(user.password);
-        return await create({
-            connection: connection,
-            queryString: 'INSERT INTO USERS(USERNAME, PASSWORD, SALT, EMAIL, GENDER, NAME, AGE) VALUES(?, ?, ?, ?, ?, ?, ?)',
-            params: [user.username, hashedPassword, salt, user.email, user.gender, user.name, user.age]
-        });
+        return await knex('users').insert(
+            { USERNAME: user.username, PASSWORD: hashedPassword, SALT: salt, EMAIL: user.email, GENDER: user.gender, NAME: user.name, AGE: user.age }
+        );
     }
 
     async getByEmail(email) {
-        const user = await getOne({
-            connection: connection,
-            queryString: 'SELECT * FROM USERS WHERE EMAIL = ?',
-            params: [email]
-        });
+        const user = await knex.select().from('users').where('EMAIL', email);
 
         return user;
     }
 
     async generateForgetPasswordToken(userId) {
-        const user = await getOne({
-            connection: connection,
-            queryString: 'SELECT * FROM USERS WHERE ID = ?',
-            params: [userId]
-        });
+        const user = await knex.select().from('users').where('ID', userId);
 
         if (!user) {
             throw new NotFoundException('User does not exist');
@@ -82,11 +59,9 @@ class AuthService {
             const forgetPasswordToken = HashHelper.generateRandomToken();
             const forgetPasswordTokenExpiration = new Date(Date.now() + 30 * 60 * 1000);
 
-            await update({
-                connection: connection,
-                queryString: 'UPDATE USERS SET FORGET_PASSWORD_TOKEN = ?, FORGET_PASSWORD_TOKEN_EXPIRATION = ? WHERE ID = ?',
-                params: [forgetPasswordToken, forgetPasswordTokenExpiration, userId]
-            });
+            await knex('users').where('ID', userId).update(
+                { FORGET_PASSWORD_TOKEN : forgetPasswordToken, FORGET_PASSWORD_TOKEN_EXPIRATION: forgetPasswordTokenExpiration }
+            );
 
             return forgetPasswordToken;
         } else {
@@ -103,11 +78,7 @@ class AuthService {
     }
 
     async resetPassword(token, password) {
-        const user = await getOne({
-            connection: connection,
-            queryString: 'SELECT * FROM USERS WHERE FORGET_PASSWORD_TOKEN = ?',
-            params: [token]
-        });
+        const user = await knex.select().from('users').where('FORGET_PASSWORD_TOKEN', token);
 
         if (user == null) {
             throw new NotFoundException('Invalid token.');
@@ -118,11 +89,10 @@ class AuthService {
         }
 
         const { salt, hashedPassword } = HashHelper.hash(password);
-        return await update({
-            connection: connection,
-            queryString: 'UPDATE USERS SET PASSWORD = ?, SALT = ?, FORGET_PASSWORD_TOKEN = ?, FORGET_PASSWORD_TOKEN_EXPIRATION = ? WHERE ID = ?',
-            params: [hashedPassword, salt, null, null, user.ID]
-        });
+        
+        return await knex('users').where('ID', user.ID).update(
+            { PASSWORD : hashedPassword, SALT: salt, FORGET_PASSWORD_TOKEN: null, FORGET_PASSWORD_TOKEN_EXPIRATION: null }
+        );
     }
 }
 
