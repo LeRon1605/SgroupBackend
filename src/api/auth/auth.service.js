@@ -16,9 +16,11 @@ class AuthService {
     }
 
     getCredential = async (username, password) => {
-        const user = await knex.select().from('users').where('USERNAME', username);
-
-        if (user && HashHelper.comparePassword({ hashedPassword: user.PASSWORD, salt: user.SALT, rawPassword: password })) {
+        const rows = await knex.select().from('users').where('USERNAME', username);
+        if (rows.length < 0) return null;
+        
+        const user = rows[0];
+        if (HashHelper.comparePassword({ hashedPassword: user.PASSWORD, salt: user.SALT, rawPassword: password })) {
             return jwt.sign({
                 id: user.ID,
                 username: user.NAME
@@ -32,7 +34,7 @@ class AuthService {
 
     async checkExist(username) {
         const user = await knex.select().from('users').where('USERNAME', username);
-        return user != null;
+        return user.length > 0;
     }
 
     async register(user) {

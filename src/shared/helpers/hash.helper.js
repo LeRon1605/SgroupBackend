@@ -13,6 +13,7 @@ class HashHelper {
 
     comparePassword({ hashedPassword, salt, rawPassword }) {
         const hashedRawPassword = crypto.pbkdf2Sync(rawPassword, salt, 1000, 64, 'sha512').toString('hex'); 
+        console.log(rawPassword);
         return hashedPassword === hashedRawPassword;
     }
 
